@@ -2,7 +2,7 @@
 * example with AFBWSAPI connection
 **************************************************************************************/
 
-AFB = require('afb');
+import * as AFB from 'libafbws';
 
 var events = {};
 function getevent(name) {

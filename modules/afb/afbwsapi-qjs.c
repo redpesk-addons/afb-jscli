@@ -216,6 +216,7 @@ static JSValue wsapi_msg_make(JSContext *ctx, const struct afb_wsapi_msg *msg)
 	default:
 		break;
 	}
+	return obj;
 }
 
 /**************************************************************/
@@ -764,13 +765,19 @@ struct afb_wsapi_itf itf_wsapi =
 	.on_description = wsapi_on_description
 };
 
-static int mkAFBWSAPI(JSContext *ctx, JSValue target, const char *uri)
+static int mkAFBWSAPI(JSContext *ctx, JSValue target, const char *uri, int fd)
 {
+	struct afb_wsapi *wsapi;
+	/* get the callback function */
+
 	struct holder *holder = malloc(sizeof *holder);
 	if (holder) {
 		holder->ctx = ctx;
 		holder->value = target;
-		holder->item = client_wsapi(uri, &itf_wsapi, holder);
+		if (fd < 0)
+			holder->item = client_wsapi(uri, &itf_wsapi, holder);
+		else if (afb_wsapi_create((struct afb_wsapi **)&holder->item, fd, &itf_wsapi, holder) < 0)
+			holder->item = 0;
 		if (holder->item) {
 			JS_SetOpaque(target, holder);
 			JS_SetPropertyStr(ctx, target, "uri", JS_NewString(ctx, uri));
@@ -796,24 +803,23 @@ static struct server *servers;
 
 int wsapi_onclient(void *closure, int fd)
 {
+	int s = -1;
 	struct server *srv = closure;
 	struct holder *holder;
 	JSValue obj, obj2;
-
-	/* get the callback function */
 
 	/* create a new instance of AFBWSAPI object */
 	if (srv->used) {
 		obj = JS_NewObjectClass(srv->ctx, afb_wsapi_class_id);
 		if (JS_IsObject(obj)) {
-			if (mkAFBWSAPI(srv->ctx, obj, srv->uri)) {
-				obj2 = JS_DupValue(srv->ctx, obj);
-				JS_Call(srv->ctx, srv->func, srv->thisobj, 1, &obj2);
-			}
+				if (mkAFBWSAPI(srv->ctx, obj, srv->uri, fd)) {
+					obj2 = JS_DupValue(srv->ctx, obj);
+					JS_Call(srv->ctx, srv->func, srv->thisobj, 1, &obj2);
+				}
 		}
 		JS_FreeValue(srv->ctx, obj);
 	}
-	return 0;
+	return s;
 }
 
 static JSValue wsapi_serve(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
@@ -868,15 +874,15 @@ static JSValue wsapi_serve(JSContext *ctx, JSValueConst this_val, int argc, JSVa
 		}
 		strcpy(srv->uri, uri);
 		JS_FreeCString(ctx, uri);
-		srv->ctx = JS_DupContext(ctx);
-		srv->func = JS_DupValue(ctx, argv[1]);
-		srv->thisobj = JS_DupValue(ctx, this_val);
 		srv->used = 0;
 		s = client_serve(srv->uri, wsapi_onclient, srv);
 		if (s < 0) {
 			free(srv);
 			return JS_ThrowInternalError(ctx, "failed with code %d", s);
 		}
+		srv->ctx = JS_DupContext(ctx);
+		srv->func = JS_DupValue(ctx, argv[1]);
+		srv->thisobj = JS_DupValue(ctx, this_val);
 		srv->fd = s;
 		srv->used = 1;
 		srv->previous = 0;
@@ -909,7 +915,7 @@ static JSValue AFBWSAPI_constructor(JSContext *ctx, JSValueConst new_target, int
 	if (JS_VALUE_GET_TAG(obj) != JS_TAG_OBJECT)
 		goto error3;
 
-	if (mkAFBWSAPI(ctx, obj, uri)) {
+	if (mkAFBWSAPI(ctx, obj, uri, -1)) {
 		JS_FreeCString(ctx, uri);
 		return obj;
 	}
@@ -955,6 +961,8 @@ static const JSCFunctionListEntry afb_wsapi_proto_funcs[] = {
 	JS_CFUNC_DEF("eventUnexpected_", 1, wsapi_event_unexpected),
 	JS_CFUNC_DEF("eventBroadcast_", 4, wsapi_event_broadcast),
 	JS_CFUNC_DEF("describe_", 1, wsapi_describe),
+};
+static const JSCFunctionListEntry afb_wsapi_funcs[] = {
 	JS_CFUNC_DEF("serve_", 2, wsapi_serve),
 };
 
@@ -975,6 +983,7 @@ int AFBWSAPI_init(JSContext *ctx, JSModuleDef *m)
 	/* set proto.constructor and ctor.prototype */
 	JS_SetConstructor(ctx, afbwsapi, proto);
 	JS_SetClassProto(ctx, afb_wsapi_class_id, proto);
+	JS_SetPropertyFunctionList(ctx, afbwsapi, afb_wsapi_funcs, 1);
 			
 	JS_SetModuleExport(ctx, m, "AFBWSAPI", afbwsapi);
 	return 0;
