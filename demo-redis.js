@@ -1,7 +1,7 @@
 /**************************************************************************************
 * example with AFBWSAPI connection
 **************************************************************************************/
-AFB = require('afb');
+import * as AFB from 'libafbws';
 
 modbus = new AFB.AFBWSAPI("unix:@modbus");
 redis = new AFB.AFBWSAPI("unix:@redis");

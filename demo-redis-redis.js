@@ -2,7 +2,7 @@
 * example with AFBWSAPI connection
 **************************************************************************************/
 
-AFB = require('afb');
+import * as AFB from 'libafbws';
 
 function onIncoming(ws) {
 	ws.onCall = function(hndl, verb, obj, sessionid, tokenid, creds) {
