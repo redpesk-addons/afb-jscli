@@ -19,7 +19,7 @@ ap=$!
 
 sleep 2
 
-valgrind ./afb-jscli essai.js
+valgrind --leak-check=full --show-leak-kinds=definite ./afb-jscli essai.js
 RET=$?
 
 afb-client localhost:$PORT/api hello exit > /dev/null

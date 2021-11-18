@@ -87,7 +87,6 @@ void on_wsj1_event(void *closure, const char *event, struct afb_wsj1_msg *msg)
 		JS_FreeValue(holder->ctx, argv[0]);
 		JS_FreeValue(holder->ctx, argv[1]);
 	}
-	afb_wsj1_msg_unref(msg);
 }
 
 struct afb_wsj1_itf itf_wsj1 = {
@@ -111,7 +110,6 @@ void wsj1_onreply(void *closure, struct afb_wsj1_msg *msg)
 	JS_FreeValue(holder->ctx, holder->value);
 	killholder(holder);
 	JS_FreeValue(this_holder->ctx, this_holder->value);
-	afb_wsj1_msg_unref(msg);
 }
 
 static JSValue wsj1_call(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
@@ -145,6 +143,7 @@ static JSValue wsj1_call(JSContext *ctx, JSValueConst this_val, int argc, JSValu
 
 	funholder->item = holder;
 	s = afb_wsj1_call_s(wsj1, api, verb, json, wsj1_onreply, funholder);
+	JS_FreeCString(ctx, json);
 	if (s < 0)
 		goto error5;
 	JS_DupValue(ctx, this_val);

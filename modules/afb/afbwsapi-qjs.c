@@ -123,6 +123,7 @@ static JSValue wsapi_msg_reply(JSContext *ctx, JSValueConst this_val, int argc, 
 	}
 	s = afb_wsapi_msg_reply_s(msg, obj, err, info);
 	if (s >= 0) {
+		JS_SetOpaque(this_val, 0);
 		msg_finalize(this_val);
 		ret = JS_UNDEFINED;
 	}
