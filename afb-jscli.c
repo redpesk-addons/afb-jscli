@@ -37,6 +37,10 @@
 #include "quickjs/cutils.h"
 #include "quickjs/quickjs-libc.h"
 
+#ifndef MODPATH
+#define MODPATH "/usr/local/share/afb-jscli/modules"
+#endif
+
 static const char *extensions[] = {
 	"",
 	".js",
@@ -99,11 +103,13 @@ static int search_path_of_required(char *path, size_t size, const char *required
 				for ( ; *spat && *spat == ':' ; spat++);
 				for (iend = 0 ; spat[iend] && spat[iend] != ':' ; iend++);
 				if (iend) {
-					found = try_path_of_required(path, size, "%.*s/%s", iend, spat, required);
+					found = try_path_of_required(path, size, "%s/%s", iend, spat, required);
 					spat += iend;
 				}
 			}
 		}
+		if (!found)
+			found = try_path_of_required(path, size, "%s/%s", MODPATH, required);
 	}
 	return found;
 }
