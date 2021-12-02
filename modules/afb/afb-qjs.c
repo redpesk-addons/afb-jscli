@@ -67,12 +67,12 @@ int client_serve(const char *uri, int (*onclient)(void*,int), void *closure)
 static JSValue qjs_loop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
 {
 	int sts;
-	uint64_t delay = (uint64_t)-1, adelay;
+	int64_t delay = -1, adelay;
 
 	if (argc > 0 && JS_ToInt64(ctx, &adelay, argv[0]) >= 0)
 		delay = 1000LL * adelay;
 
-	sts = sd_event_run(sdev,  delay);
+	sts = sd_event_run(sdev,  (uint64_t)delay);
 	return JS_NewBool(ctx, sts > 0);
 }
 

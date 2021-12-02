@@ -7,23 +7,22 @@ include(FindPkgConfig)
 
 pkg_check_modules(AFBCLI REQUIRED IMPORTED_TARGET libafbcli libsystemd)
 
-set(QJSDIR ${CMAKE_CURRENT_SOURCE_DIR}/quickjs)
-set(MODDIR ${CMAKE_CURRENT_SOURCE_DIR}/modules)
+set(QJSDIR ${CMAKE_SOURCE_DIR}/quickjs)
+set(MODDIR ${CMAKE_SOURCE_DIR}/modules)
 set(MODPATH ${CMAKE_INSTALL_FULL_DATADIR}/afb-jscli/modules)
 
-add_custom_command(
-	OUTPUT ${QJSDIR}/libquickjs.a
-	COMMAND make -C ${QJSDIR} prefix=$(CMAKE_INSTALL_PREFIX) CONFIG_BIGNUM= libquickjs.a
-)
+add_library(qjs OBJECT quickjs/quickjs.c quickjs/libregexp.c quickjs/libunicode.c quickjs/cutils.c quickjs/quickjs-libc.c)
+target_compile_definitions(qjs PRIVATE _GNU_SOURCE CONFIG_VERSION="2021-03-27")
 
 add_executable(afb-jscli afb-jscli.c)
-target_link_libraries(afb-jscli ${QJSDIR}/libquickjs.a -lm -ldl -lpthread)
-target_include_directories(afb-jscli PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+set_target_properties(afb-jscli PROPERTIES ENABLE_EXPORTS TRUE)
+target_link_libraries(afb-jscli qjs -lm -ldl -lpthread)
+target_include_directories(afb-jscli PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_definitions(afb-jscli PRIVATE MODPATH="${MODPATH}")
 
 add_library(afb-qjs SHARED modules/afb/afb-qjs.c modules/afb/afbwsj1-qjs.c modules/afb/afbwsapi-qjs.c)
-target_include_directories(afb-qjs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${AFBCLI_INCLUDE_DIRS})
-target_link_libraries(afb-qjs PkgConfig::AFBCLI)
+target_include_directories(afb-qjs PRIVATE ${CMAKE_SOURCE_DIR} ${AFBCLI_INCLUDE_DIRS})
+target_link_libraries(afb-qjs PkgConfig::AFBCLI afb-jscli)
 
 install(TARGETS afb-jscli DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
