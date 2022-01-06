@@ -1,3 +1,6 @@
+# Copyright (C) 2019-2022 IoT.bzh Company
+# Author: José Bollo <jose.bollo@iot.bzh>
+###########################################
 cmake_minimum_required(VERSION 3.13)
 
 project(afb-jscli VERSION 0.2.0 LANGUAGES C)

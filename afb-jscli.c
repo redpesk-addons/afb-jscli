@@ -1,5 +1,6 @@
 /*
- * afb-jscli
+ * Copyright (C) 2019-2022 IoT.bzh Company
+ * Author: José Bollo <jose.bollo@iot.bzh>
  *
  * Inspired by QuickJS from Fabrice Bellard and Charlie Gordon
  *
