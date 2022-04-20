@@ -784,7 +784,7 @@ static int mkAFBWSAPI(JSContext *ctx, JSValue target, const char *uri, int fd)
 		holder->value = target;
 		if (fd < 0)
 			holder->item = client_wsapi(uri, &itf_wsapi, holder);
-		else if (afb_wsapi_create((struct afb_wsapi **)&holder->item, fd, &itf_wsapi, holder) < 0)
+		else if (afb_wsapi_create((struct afb_wsapi **)&holder->item, fd, 1, &itf_wsapi, holder) < 0)
 			holder->item = 0;
 		if (holder->item) {
 			JS_SetOpaque(target, holder);

@@ -3,12 +3,12 @@
 ###########################################
 cmake_minimum_required(VERSION 3.13)
 
-project(afb-jscli VERSION 0.2.0 LANGUAGES C)
+project(afb-jscli VERSION 0.3.0 LANGUAGES C)
 
 include(GNUInstallDirs)
 include(FindPkgConfig)
 
-pkg_check_modules(AFBCLI REQUIRED IMPORTED_TARGET libafbcli libsystemd)
+pkg_check_modules(AFBCLI REQUIRED IMPORTED_TARGET libafbcli>=4.1 libsystemd)
 
 set(QJSDIR ${CMAKE_SOURCE_DIR}/quickjs)
 set(MODDIR ${CMAKE_SOURCE_DIR}/modules)
