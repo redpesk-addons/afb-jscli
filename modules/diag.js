@@ -1,5 +1,7 @@
 /**************************************************************************************
  * This section defines a basic success/failure calls
+ *
+ * TAP: Test Anything Protocol (see https://testanything.org/)
  */
 
 var count_of_tests = 0;
