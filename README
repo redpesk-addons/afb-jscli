@@ -1,0 +1,11 @@
+This repository contains an integration of redpesk framework communication layers
+on top of QuickJS (https://bellard.org/quickjs/).
+
+It provides a basic way to create basic javascript programs for
+redpesk framework.
+
+It requires libafbcli >= 4 (https://github.com/redpesk-core/afb-libafb) and libsystemd.
+
+Distributed under MIT license (see LICENSE) except content of directory quickjs.
+QuickJS is distributed under MIT license too (see quickjs/LICENSE)
+
